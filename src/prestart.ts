@@ -47,7 +47,7 @@ export function setupWinston(): void {
     });
 }
 
-function loadConfig(configFile) {
+export function loadConfig(configFile: string): void {
     nconf.file({
         file: configFile,
     });
@@ -65,22 +65,24 @@ function loadConfig(configFile) {
 
     // Explicitly cast as Bool, loader.js passes in isCluster as string 'true'/'false'
     const castAsBool = ['isCluster', 'isPrimary', 'jobsDisabled'];
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     nconf.stores.env.readOnly = false;
     castAsBool.forEach((prop) => {
-        const value = nconf.get(prop);
+        const value = nconf.get(prop) as tp1;
         if (value !== undefined) {
             nconf.set(prop, ['1', 1, 'true', true].includes(value));
         }
     });
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     nconf.stores.env.readOnly = true;
     nconf.set('runJobs', nconf.get('isPrimary') && !nconf.get('jobsDisabled'));
 
     // Ensure themes_path is a full filepath
-    nconf.set('themes_path', path.resolve(paths.baseDir, nconf.get('themes_path')));
+    nconf.set('themes_path', path.resolve(paths.baseDir, nconf.get('themes_path') as string));
     nconf.set('core_templates_path', path.join(paths.baseDir, 'src/views'));
-    nconf.set('base_templates_path', path.join(nconf.get('themes_path'), 'nodebb-theme-persona/templates'));
+    nconf.set('base_templates_path', path.join(nconf.get('themes_path') as string, 'nodebb-theme-persona/templates'));
 
-    nconf.set('upload_path', path.resolve(nconf.get('base_dir'), nconf.get('upload_path')));
+    nconf.set('upload_path', path.resolve(nconf.get('base_dir') as string, nconf.get('upload_path') as string));
     nconf.set('upload_url', '/assets/uploads');
 
 
@@ -90,10 +92,11 @@ function loadConfig(configFile) {
     }
 
     if (nconf.get('url')) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
         nconf.set('url', nconf.get('url').replace(/\/$/, ''));
-        nconf.set('url_parsed', url.parse(nconf.get('url')));
+        nconf.set('url_parsed', url.parse(nconf.get('url') as string));
         // Parse out the relative_url and other goodies from the configured URL
-        const urlObject = url.parse(nconf.get('url'));
+        const urlObject = url.parse(nconf.get('url') as string);
         const relativePath = urlObject.pathname !== '/' ? urlObject.pathname.replace(/\/+$/, '') : '';
         nconf.set('base_url', `${urlObject.protocol}//${urlObject.host}`);
         nconf.set('secure', urlObject.protocol === 'https:');
@@ -102,11 +105,11 @@ function loadConfig(configFile) {
         if (!nconf.get('asset_base_url')) {
             nconf.set('asset_base_url', `${relativePath}/assets`);
         }
-        nconf.set('port', nconf.get('PORT') || nconf.get('port') || urlObject.port || (nconf.get('PORT_ENV_VAR') ? nconf.get(nconf.get('PORT_ENV_VAR')) : false) || 4567);
+        nconf.set('port', nconf.get('PORT') || nconf.get('port') || urlObject.port || (nconf.get('PORT_ENV_VAR') ? nconf.get(nconf.get('PORT_ENV_VAR') as string) : false) || 4567);
 
         // cookies don't provide isolation by port: http://stackoverflow.com/a/16328399/122353
-        const domain = nconf.get('cookieDomain') || urlObject.hostname;
-        const origins = nconf.get('socket.io:origins') || `${urlObject.protocol}//${domain}:*`;
+        const domain = nconf.get('cookieDomain') as string || urlObject.hostname;
+        const origins = nconf.get('socket.io:origins') as string || `${urlObject.protocol}//${domain}:*`;
         nconf.set('socket.io:origins', origins);
     }
 }
