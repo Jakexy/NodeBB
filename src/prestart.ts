@@ -12,12 +12,12 @@ import { paths } from './constants';
 
 type tp1 = string|boolean|number;
 
-function setupWinston() {
+export function setupWinston(): void {
     if (!winston.format) {
         return;
     }
 
-    const formats = [];
+    const formats: winston.Logform.Format[] = [];
     if (nconf.get('log-colorize') !== 'false') {
         formats.push(winston.format.colorize());
     }
@@ -27,7 +27,7 @@ function setupWinston() {
         formats.push(winston.format.json());
     } else {
         const timestampFormat = winston.format((info) => {
-            const dateString = `${new Date().toISOString()} [${nconf.get('port')}/${global.process.pid}]`;
+            const dateString = `${new Date().toISOString()} [${nconf.get('port') as string}/${global.process.pid}]`;
             info.level = `${dateString} - ${info.level}`;
             return info;
         });
@@ -37,8 +37,8 @@ function setupWinston() {
     }
 
     winston.configure({
-        level: nconf.get('log-level') || (process.env.NODE_ENV === 'production' ? 'info' : 'verbose'),
-        format: winston.format.combine.apply(null, formats),
+        level: (nconf.get('log-level')) as string || (process.env.NODE_ENV === 'production' ? 'info' : 'verbose'),
+        format: winston.format.combine.apply(null, formats) as winston.Logform.Format,
         transports: [
             new winston.transports.Console({
                 handleExceptions: true,
