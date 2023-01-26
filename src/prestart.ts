@@ -10,7 +10,7 @@ import semver = require('semver');
 import pkg from '../package.json';
 import { paths } from './constants';
 
-
+type tp1 = string|boolean|number;
 
 function setupWinston() {
     if (!winston.format) {
